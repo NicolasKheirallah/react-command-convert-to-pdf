@@ -14,8 +14,11 @@ const GRAPH_API_BASE: string = 'https://graph.microsoft.com/v1.0';
 
 export default class PdfExportCommandSet extends BaseListViewCommandSet<IPdfExportCommandSetProperties> {
   private aadHttpClient!: AadHttpClient;
-  private readonly supportedFileTypes = new Set(['doc','docx', 'xlsx', 'pptx', 'csv', 'rtf']);
-
+  private readonly supportedFileTypes = new Set([
+    'csv', 'doc', 'docx', 'odp', 'ods', 'odt', 'pot', 'potm', 'potx', 
+    'pps', 'ppsx', 'ppsm', 'ppt', 'pptm', 'pptx', 'rtf', 'xls', 'xlsx', 'html'
+  ]);
+  
   @override
   public async onInit(): Promise<void> {
     Log.info(LOG_SOURCE, 'Initialized PdfExportCommandSet');
