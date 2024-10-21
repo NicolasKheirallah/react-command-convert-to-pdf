@@ -63,7 +63,7 @@ const WaitDialogContent: React.FC<IWaitDialogContentProps> = ({
   const dialogType = showClose ? DialogType.close : DialogType.normal;
 
   return (
-    <div className={styles.dialogContainer}>
+    <div className={styles['dialog-container']}>
       <Dialog
         hidden={hidden}
         dialogContentProps={{ type: dialogType, title, subText: message }}
@@ -71,7 +71,7 @@ const WaitDialogContent: React.FC<IWaitDialogContentProps> = ({
         aria-live="assertive" aria-label={title} aria-describedby="dialog-message"
       >
         <ErrorLabel error={error} />
-        <div className={styles.pnpFooter}>
+        <div className={styles["pnp-footer"]}>
           <a href="https://github.com/pnp/PnP" target="_blank" rel="noopener noreferrer">
             Powered by PnP
           </a>

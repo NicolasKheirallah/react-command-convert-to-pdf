@@ -7,18 +7,19 @@ import { saveAs } from 'file-saver';
 import WaitDialog from './WaitDialog';
 import * as strings from 'PdfExportCommandSetStrings';
 
-export interface IPdfExportCommandSetProperties {}
+export interface IPdfExportCommandSetProperties { }
 
 const LOG_SOURCE: string = 'PdfExportCommandSet';
 const GRAPH_API_BASE: string = 'https://graph.microsoft.com/v1.0';
 
 export default class PdfExportCommandSet extends BaseListViewCommandSet<IPdfExportCommandSetProperties> {
   private aadHttpClient!: AadHttpClient;
+  private readonly supportedFileTypes = new Set(['doc','docx', 'xlsx', 'pptx', 'csv', 'rtf']);
 
   @override
   public async onInit(): Promise<void> {
     Log.info(LOG_SOURCE, 'Initialized PdfExportCommandSet');
-    this.aadHttpClient = await this.context.aadHttpClientFactory.getClient(GRAPH_API_BASE);
+    this.aadHttpClient = await this.context.aadHttpClientFactory.getClient('https://graph.microsoft.com');
     return Promise.resolve();
   }
 
@@ -42,6 +43,9 @@ export default class PdfExportCommandSet extends BaseListViewCommandSet<IPdfExpo
     const siteId = this.context.pageContext.site.id;
     const selectedItem = event.selectedRows[0];
     const fileName = selectedItem.getValueByName('FileLeafRef');
+    const fileExtension = fileName.split('.').pop()?.toLowerCase();
+
+    // Extract the drive item path
     const spItemUrl = selectedItem.getValueByName('.spItemUrl');
     const driveItemPath = this.extractDriveItemPath(spItemUrl);
 
@@ -50,18 +54,27 @@ export default class PdfExportCommandSet extends BaseListViewCommandSet<IPdfExpo
       return;
     }
 
-    try {
-      if (event.itemId === 'EXPORT') {
-        await this.handlePdfConversion(siteId, driveItemPath, fileName, true);  // Download PDF
-      } else if (event.itemId === 'SAVE_AS') {
-        const pdfBlob = await this.handlePdfConversion(siteId, driveItemPath, fileName, false);  // Get PDF blob
-        if (pdfBlob) {
-          await this.uploadPdfToLibrary(driveItemPath, this.removeFileExtension(fileName) + '.pdf', pdfBlob);
-          window.location.reload();
+    // Validate file extension
+    if (!fileExtension || !this.supportedFileTypes.has(fileExtension)) {
+      Log.warn(LOG_SOURCE, `Unsupported file type: ${fileName}`);
+      this.handleError(new Error('Unsupported file type'), 'This file type cannot be converted to PDF.');
+      return;
+    }
+    else {
+
+      try {
+        if (event.itemId === 'EXPORT') {
+          await this.handlePdfConversion(siteId, driveItemPath, fileName, true);  // Download PDF
+        } else if (event.itemId === 'SAVE_AS') {
+          const pdfBlob = await this.handlePdfConversion(siteId, driveItemPath, fileName, false);  // Get PDF blob
+          if (pdfBlob) {
+            await this.uploadPdfToLibrary(driveItemPath, this.removeFileExtension(fileName) + '.pdf', pdfBlob);
+            window.location.reload();
+          }
         }
+      } catch (error) {
+        this.handleError(error, 'An unexpected error occurred.');
       }
-    } catch (error) {
-      this.handleError(error, 'An unexpected error occurred.');
     }
   }
 
