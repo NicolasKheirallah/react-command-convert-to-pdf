@@ -1,0 +1,29 @@
+@import "~@fluentui/react/dist/sass/FluentUI";
+
+$font-size-small: 0.8em;
+$dialog-width: 400px;
+$error-color: $ms-color-redDark; // Fluent UI theme red
+
+.dialog-container {
+  width: $dialog-width;
+}
+
+.dialog-message {
+  font-size: $font-size-small;
+  text-align: center;
+  float: right;
+
+  a {
+    color: $ms-color-neutralPrimary;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.error-label {
+  margin-bottom: 10px;
+  color: $error-color;
+}
